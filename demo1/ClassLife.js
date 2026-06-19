@@ -1,5 +1,5 @@
 class life {
-  //输入所有life的条件
+  //输入所有life的条件//////////////////////////////////////////////////////////////
   constructor(x, y, speed, walkFrame) {
     // constructor (l,m,r,x,y) {
     // this.l = img;//left向左的图片
@@ -23,12 +23,12 @@ class life {
     this.ticksLeft = this.walkFrame[0].duration;//这一帧停留多久
 
 
-    // //test walkframe
-    // let walkFrame = [];
-    // walkFrame[0] = m;
+    //走走停停功能
+    this.state = "walking";//current behaviour state
+    this.stateTicksLeft = 80;// how long this state going to last
   }
 
-  //animation working
+  //animation working////////////////////////////////////////////////////
   updateAnimation() {
     //when is not walking, character presents as frame0
     if (!this.isWalking) {
@@ -36,8 +36,6 @@ class life {
       this.ticksLeft = this.walkFrame[0].duration;
       return;//立刻结束当前函数，后面的代码不再执行
     }
-
-
 
     // 每执行一次 updateAnimation，剩余 tick 减少 1
     this.ticksLeft--;
@@ -56,7 +54,7 @@ class life {
     }
   }
 
-  //展示图片
+  //展示图片////////////////////////////////////////////////////////////////
   display() {
     // image(this.m,this.x,this.y);
 
@@ -81,11 +79,12 @@ class life {
 
   }
 
+  //walking function//////////////////////////////////////////////////////////////
   walk() {
     this.isWalking = false;
 
     //水平移动
-    //when the distance between character and targetX is smaller than speed (which means step distance because the character will beyond destination on next frame), next frame the character's x equals targetX. So that the character would not surpass destination and vibrate.
+    //when the distance between character and targetX is smaller than speed (which means step distance because the character will beyond destination on next frame), next frame the character's x equals targetX. So that the character would not pass destination and vibrate.
     if (abs(this.targetX - this.x) <= this.speed) {
       this.x = this.targetX;
     }
@@ -121,7 +120,59 @@ class life {
     this.x = constrain(this.x, 0, width);
     this.y = constrain(this.y, 0, height);
   }
-  // update() {
 
-  // }
+  rest() {
+    // 这一帧没有移动
+    this.isWalking = false;
+  }
+
+  //state switching from walking to resting/////////////////////////////////
+  //决定什么时候切换状态
+  updateState() {
+    // 当前状态剩余时间减一
+    this.stateTicksLeft--;
+
+    if (this.stateTicksLeft <= 0) {
+
+      if (this.state === "walking") {
+        // 从走路切换为休息
+        this.state = "resting";
+        // this.stateTicksLeft = random(0,200);//the'resting' state last how much time
+        this.stateTicksLeft = abs(this.x - this.targetX);//depends on the distance between character and target //the closer the faster
+        console.log("resting time", this.stateTicksLeft);
+      }
+      else if (this.state === "resting") {
+        // 从休息切换为走路
+        this.state = "walking";
+        // this.stateTicksLeft = 80;//the 'walking' state last how much time
+        this.stateTicksLeft = 10000 / (abs(this.x - this.targetX) + 1);//depends on the distance between character and target //the closer the longer
+        console.log("walking time", this.stateTicksLeft);
+      }
+
+      // else if (this.state === "jumping") {
+      //   this.state = "resting";
+      //   this.stateTicksLeft = 40;
+      // }
+    }
+  }
+
+  //統一的狀態機更新执行////////////////////////////////////////////////////
+  update() {
+    // 先更新状态和倒计时
+    this.updateState();
+
+    // 如果当前状态是 walking，就执行走路
+    if (this.state === "walking") {
+      this.walk();
+    }
+
+    // 如果当前状态是 resting，就执行休息
+    if (this.state === "resting") {
+      this.rest();
+    }
+
+    // 最后更新动画
+    this.updateAnimation();
+  }
+
 }

@@ -86,8 +86,9 @@ function draw() {
 
   
   //先计算移动，再更新动画
-  ocpus1.walk();
-  ocpus1.updateAnimation();
+  // ocpus1.walk();
+  // ocpus1.updateAnimation();
+  ocpus1.update();
   ocpus1.display();
 
   urch1.walk();
