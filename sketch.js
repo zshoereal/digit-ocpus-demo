@@ -31,6 +31,7 @@ function setup() {
   const canvas = createCanvas(canvasSize, canvasSize);
   canvas.addClass("experience-canvas");
   canvas.parent("canvas-container");
+  setupCanvasPointerControls(canvas.elt);
   frameRate(40);
 
   // 初始互动点位于画布中心。用户尚未移动鼠标或触摸时，
@@ -108,39 +109,48 @@ function calculateCanvasSize() {
   return max(180, min(500, windowWidth - 24));
 }
 
-// 桌面端：鼠标在画布中移动或拖动时更新互动位置。
-function mouseMoved() {
-  updateInteractionPosition(mouseX, mouseY);
-}
+// 只给 canvas 自身绑定 Pointer Events。
+// 这是移动端交互的关键：画布内拖动控制角色；按钮和问卷区域完全不拦截，
+// 因此仍能正常点击按钮、输入文字和上下滚动页面。
+function setupCanvasPointerControls(canvasElement) {
+  let isPointerInsideCanvas = false;
 
-function mouseDragged() {
-  updateInteractionPosition(mouseX, mouseY);
-  return false;
-}
+  function updateFromPointer(event) {
+    const canvasRectangle = canvasElement.getBoundingClientRect();
+    const scaleX = width / canvasRectangle.width;
+    const scaleY = height / canvasRectangle.height;
 
-function mousePressed() {
-  updateInteractionPosition(mouseX, mouseY);
-}
-
-// 移动端：使用第一根手指在画布中的位置。
-// 返回 false 会阻止浏览器把拖动解释成页面滚动或下拉刷新。
-function touchStarted() {
-  if (touches.length > 0) {
-    updateInteractionPosition(touches[0].x, touches[0].y);
+    updateInteractionPosition(
+      (event.clientX - canvasRectangle.left) * scaleX,
+      (event.clientY - canvasRectangle.top) * scaleY
+    );
   }
-  return false;
-}
 
-function touchMoved() {
-  if (touches.length > 0) {
-    updateInteractionPosition(touches[0].x, touches[0].y);
+  canvasElement.addEventListener("pointerdown", (event) => {
+    isPointerInsideCanvas = true;
+    canvasElement.setPointerCapture(event.pointerId);
+    updateFromPointer(event);
+    event.preventDefault();
+  });
+
+  canvasElement.addEventListener("pointermove", (event) => {
+    // 鼠标无需按下也可控制；触摸或触控笔则需要从画布内按下开始。
+    if (event.pointerType === "mouse" || isPointerInsideCanvas) {
+      updateFromPointer(event);
+      event.preventDefault();
+    }
+  });
+
+  function finishPointer(event) {
+    isPointerInsideCanvas = false;
+
+    if (canvasElement.hasPointerCapture(event.pointerId)) {
+      canvasElement.releasePointerCapture(event.pointerId);
+    }
   }
-  return false;
-}
 
-function touchEnded() {
-  // 不重置坐标：手指离开后，最后一次触摸位置继续作为互动目标。
-  return false;
+  canvasElement.addEventListener("pointerup", finishPointer);
+  canvasElement.addEventListener("pointercancel", finishPointer);
 }
 
 // 只接受画布范围内的位置，避免触摸按钮时改变角色目标。
