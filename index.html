@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ocpus & Urch — Four Modes</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="libraries/p5.min.js"></script>
+  </head>
+
+  <body>
+    <main class="page-shell">
+      <section class="experience-section">
+        <div class="mode-panel" aria-label="模式切换">
+          <div class="mode-buttons">
+            <button type="button" data-mode="demo0">Demo 0</button>
+            <button type="button" data-mode="demo1">Demo 1</button>
+            <button type="button" data-mode="demo2">Demo 2</button>
+            <button type="button" data-mode="demo3">Demo 3</button>
+          </div>
+          <p class="interaction-hint">移动鼠标，或在画面内触摸拖动</p>
+        </div>
+        <div id="canvas-container" aria-label="互动演示区域"></div>
+      </section>
+
+      <section class="survey-section" aria-label="体验问卷">
+        <iframe
+          class="google-form"
+          src="https://docs.google.com/forms/d/e/1FAIpQLSfL8TVpYvTaitxyYYzJ96-YYI8EBZkSIVhCZ3iD7FsZ0SLaKg/viewform?embedded=true"
+          title="Demo 0、1、2、3 体验问卷"
+          loading="lazy"
+        >
+          正在加载问卷……
+        </iframe>
+      </section>
+    </main>
+
+    <script src="ClassLife.js"></script>
+    <script src="sketch.js"></script>
+  </body>
+</html>
